@@ -1,36 +1,26 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 
-let transporter;
+let resendClient;
 
-const hasSmtpConfig = () => Boolean(env.smtpHost && env.smtpUser && env.smtpPass);
-
-const getTransporter = () => {
-  if (!hasSmtpConfig()) {
+const getResendClient = () => {
+  if (!env.resendApiKey) {
     return null;
   }
 
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: env.smtpHost,
-      port: env.smtpPort,
-      secure: env.smtpPort === 465,
-      auth: {
-        user: env.smtpUser,
-        pass: env.smtpPass,
-      },
-    });
+  if (!resendClient) {
+    resendClient = new Resend(env.resendApiKey);
   }
 
-  return transporter;
+  return resendClient;
 };
 
 export const sendOtpEmail = async ({ to, code, purpose }) => {
-  const mailer = getTransporter();
+  const resend = getResendClient();
 
-  if (!mailer) {
-    logger.warn("SMTP not configured. OTP email not sent.", { to, purpose });
+  if (!resend) {
+    logger.warn("Resend not configured. OTP email not sent.", { to, purpose });
     return false;
   }
 
@@ -46,8 +36,8 @@ export const sendOtpEmail = async ({ to, code, purpose }) => {
     login_verify: "complete your login",
   };
 
-  await mailer.sendMail({
-    from: env.smtpFrom,
+  await resend.emails.send({
+    from: env.resendFrom,
     to,
     subject: subjectMap[purpose] || "Your Servify OTP",
     text: `Your Servify OTP is ${code}. Use it to ${actionMap[purpose] || "continue"}. It expires in ${env.otpTtlMinutes} minutes.`,
