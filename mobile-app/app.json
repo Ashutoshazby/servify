@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Servify",
+    "slug": "servify",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "icon": "./src/assets/servify-logo.png",
+    "splash": {
+      "image": "./src/assets/servify-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8FAFC"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.servify.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./src/assets/servify-logo.png",
+        "backgroundColor": "#F8FAFC"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.servify.app"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}

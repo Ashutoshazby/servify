@@ -1,0 +1,30 @@
+{
+  "name": "servify-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "mobile-app",
+    "admin-dashboard"
+  ],
+  "scripts": {
+    "dev": "npm-run-all --parallel dev:backend dev:mobile dev:admin",
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:mobile": "npm --workspace mobile-app start",
+    "dev:admin": "npm --workspace admin-dashboard run dev",
+    "build:backend": "node --check backend/server.js",
+    "build:admin": "npm --workspace admin-dashboard run build",
+    "test:backend": "npm --workspace backend run test",
+    "install:all": "npm install --workspaces",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  },
+  "dependencies": {
+    "expo": "~54.0.33",
+    "react": "19.1.0",
+    "react-native": "0.81.5"
+  }
+}

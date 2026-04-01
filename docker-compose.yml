@@ -1,0 +1,93 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: servify-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - servify-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: servify-backend
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      CLIENT_URL: http://localhost:8081
+      ADMIN_URL: http://localhost:5173
+      SERVER_URL: http://localhost:5000
+      MONGODB_URI: mongodb://mongodb:27017/servify
+      JWT_SECRET: replace_with_strong_secret
+      JWT_REFRESH_SECRET: replace_with_refresh_secret
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_EXPIRES_IN: 30d
+      RAZORPAY_KEY_ID: rzp_test_key
+      RAZORPAY_KEY_SECRET: rzp_test_secret
+      GOOGLE_MAPS_API_KEY: your_google_maps_key
+      FCM_PROJECT_ID: your_project_id
+      FCM_CLIENT_EMAIL: firebase_admin_email
+      FCM_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n"
+      OTP_TTL_MINUTES: 10
+      CORS_ORIGINS: http://localhost:8081,http://localhost:5173
+      DEFAULT_ADMIN_EMAIL: admin@servify.app
+      DEFAULT_ADMIN_PASSWORD: Admin@123
+    ports:
+      - "5000:5000"
+    volumes:
+      - backend_uploads:/app/uploads
+      - backend_logs:/app/backend/logs
+    networks:
+      - servify-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  admin-dashboard:
+    image: node:20-alpine
+    container_name: servify-admin
+    working_dir: /app
+    depends_on:
+      backend:
+        condition: service_healthy
+    command: sh -c "npm install --workspaces && npm --workspace admin-dashboard run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+      VITE_ADMIN_TOKEN: replace_with_admin_bearer_token
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./:/app
+    networks:
+      - servify-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:5173"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mongodb_data:
+  backend_uploads:
+  backend_logs:
+
+networks:
+  servify-network:
+    driver: bridge
