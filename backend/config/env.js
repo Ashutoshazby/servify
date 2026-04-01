@@ -26,6 +26,7 @@ export const env = {
   defaultAdminEmail: process.env.DEFAULT_ADMIN_EMAIL || "admin@servify.app",
   defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD || "Admin@123",
   autoSeedDemo: process.env.AUTO_SEED_DEMO === "true",
-  resendApiKey: process.env.RESEND_API_KEY || "",
-  resendFrom: process.env.RESEND_FROM || "Servify <onboarding@resend.dev>",
+  sendgridApiKey: process.env.SENDGRID_API_KEY || "",
+  sendgridFromEmail: process.env.SENDGRID_FROM_EMAIL || "",
+  sendgridFromName: process.env.SENDGRID_FROM_NAME || "Servify",
 };
