@@ -25,4 +25,5 @@ export const env = {
   otpTtlMinutes: Number(process.env.OTP_TTL_MINUTES || 10),
   defaultAdminEmail: process.env.DEFAULT_ADMIN_EMAIL || "admin@servify.app",
   defaultAdminPassword: process.env.DEFAULT_ADMIN_PASSWORD || "Admin@123",
+  autoSeedDemo: process.env.AUTO_SEED_DEMO === "true",
 };

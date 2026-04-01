@@ -23,7 +23,10 @@ export default function RegisterScreen({ navigation }) {
           key={field}
           style={styles.input}
           placeholder={field[0].toUpperCase() + field.slice(1)}
+          placeholderTextColor="#94A3B8"
           secureTextEntry={field === "password"}
+          autoCapitalize={field === "email" ? "none" : "sentences"}
+          keyboardType={field === "email" ? "email-address" : field === "phone" ? "phone-pad" : "default"}
           onChangeText={(value) => setForm({ ...form, [field]: value })}
         />
       ))}
@@ -41,6 +44,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
+    color: colors.text,
   },
   error: {
     color: colors.danger,

@@ -27,6 +27,12 @@
     },
     "plugins": [
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "807f4dba-b0de-4987-b358-f2dc396502fc"
+      }
+    },
+    "owner": "ashutodhazby"
   }
 }

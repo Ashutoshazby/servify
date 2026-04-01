@@ -18,8 +18,21 @@ export default function LoginScreen({ navigation }) {
         title="Welcome back"
         subtitle="Book trusted plumbers, electricians, cleaners and more across Noida in just a few taps."
       />
-      <TextInput style={styles.input} placeholder="Email" onChangeText={(email) => setForm({ ...form, email })} />
-      <TextInput style={styles.input} placeholder="Password" secureTextEntry onChangeText={(password) => setForm({ ...form, password })} />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#94A3B8"
+        autoCapitalize="none"
+        keyboardType="email-address"
+        onChangeText={(email) => setForm({ ...form, email })}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#94A3B8"
+        secureTextEntry
+        onChangeText={(password) => setForm({ ...form, password })}
+      />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <AppButton title={loading ? "Logging in..." : "Login"} disabled={loading} onPress={async () => { try { await login(form); } catch (_error) {} }} />
       <AppButton title="Create account" variant="secondary" onPress={() => navigation.navigate("Register")} />
@@ -35,6 +48,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
+    color: colors.text,
   },
   error: {
     color: colors.danger,

@@ -3,6 +3,20 @@ import * as SecureStore from "expo-secure-store";
 import { api, attachToken } from "../services/api";
 import { registerForPushNotifications, syncDeviceToken } from "../services/notifications";
 
+const getErrorMessage = (error, fallback) => {
+  const details = error?.response?.data;
+  if (typeof details?.message === "string" && details.message.trim()) {
+    return details.message;
+  }
+  if (Array.isArray(details?.errors) && details.errors.length) {
+    return details.errors.map((entry) => entry.message || entry).join(", ");
+  }
+  if (typeof error?.message === "string" && error.message.trim()) {
+    return error.message;
+  }
+  return fallback;
+};
+
 const hydrateSession = async (set) => {
   const token = await SecureStore.getItemAsync("servify_access_token");
   const refreshToken = await SecureStore.getItemAsync("servify_refresh_token");
@@ -61,7 +75,7 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       set({
         loading: false,
-        error: error?.response?.data?.message || "Login failed. Please try again.",
+        error: getErrorMessage(error, "Login failed. Please try again."),
       });
       throw error;
     }
@@ -77,7 +91,7 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       set({
         loading: false,
-        error: error?.response?.data?.message || "Registration failed. Please try again.",
+        error: getErrorMessage(error, "Registration failed. Please try again."),
       });
       throw error;
     }
