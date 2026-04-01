@@ -21,6 +21,12 @@ const validateActiveUser = (user) => {
   }
 };
 
+const validateVerifiedUser = (user) => {
+  if (user?.role !== "admin" && user?.emailVerified === false) {
+    throw new ApiError(StatusCodes.FORBIDDEN, "Verify your email before logging in");
+  }
+};
+
 export const register = catchAsync(async (req, res) => {
   const existingUser = await User.findOne({ email: req.body.email });
   if (existingUser) {
@@ -32,7 +38,7 @@ export const register = catchAsync(async (req, res) => {
 
   res.status(StatusCodes.CREATED).json({
     success: true,
-    ...(await formatAuthResponse(user)),
+    user: { ...user.toObject(), password: undefined },
     message: "Registration successful. Verify your email with the OTP sent."
   });
 });
@@ -45,6 +51,7 @@ export const login = catchAsync(async (req, res) => {
     throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid email or password");
   }
   validateActiveUser(user);
+  validateVerifiedUser(user);
 
   if (deviceToken && !user.deviceTokens.includes(deviceToken)) {
     user.deviceTokens.push(deviceToken);
@@ -151,7 +158,10 @@ export const verifyOtpCode = catchAsync(async (req, res) => {
     }
   }
 
-  res.json({ success: true, message: "OTP verified successfully" });
+  res.json({
+    success: true,
+    message: purpose === "register_verify" ? "Email verified successfully. Please log in." : "OTP verified successfully",
+  });
 });
 
 export const registerDeviceToken = catchAsync(async (req, res) => {

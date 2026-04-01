@@ -49,6 +49,7 @@ export const createUserAndLogin = async (overrides = {}) => {
   };
 
   await request(app).post("/api/auth/register").send(payload);
+  await User.findOneAndUpdate({ email: payload.email }, { emailVerified: true });
   const loginResponse = await request(app).post("/api/auth/login").send({
     email: payload.email,
     password: payload.password,
@@ -75,6 +76,7 @@ export const seedProviderFixture = async () => {
     password: "Password@123",
     phone: `8888${String(Date.now()).slice(-6)}`,
     role: "provider",
+    emailVerified: true,
   });
   const provider = await Provider.create({
     userId: user._id,

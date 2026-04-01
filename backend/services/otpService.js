@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 import { Otp } from "../models/Otp.js";
+import { sendOtpEmail } from "./emailService.js";
 
 const hashCode = (value) => crypto.createHash("sha256").update(value).digest("hex");
 
@@ -16,6 +17,9 @@ export const createOtp = async ({ target, channel, purpose }) => {
     expiresAt: new Date(Date.now() + env.otpTtlMinutes * 60 * 1000),
   });
   logger.info(`OTP generated for ${channel}:${target} purpose=${purpose} code=${code}`);
+  if (channel === "email") {
+    await sendOtpEmail({ to: target, code, purpose });
+  }
   return code;
 };
 

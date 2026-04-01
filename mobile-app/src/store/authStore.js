@@ -84,10 +84,8 @@ export const useAuthStore = create((set, get) => ({
     try {
       set({ loading: true, error: "" });
       const { data } = await api.post("/auth/register", payload);
-      attachToken(data.accessToken);
-      await SecureStore.setItemAsync("servify_access_token", data.accessToken);
-      await SecureStore.setItemAsync("servify_refresh_token", data.refreshToken);
-      set({ token: data.accessToken, refreshToken: data.refreshToken, user: data.user, loading: false });
+      set({ loading: false });
+      return data;
     } catch (error) {
       set({
         loading: false,
