@@ -10,7 +10,9 @@ export default function OTPVerificationScreen({ route, navigation }) {
   const [code, setCode] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [resending, setResending] = React.useState(false);
   const [error, setError] = React.useState("");
+  const [helperMessage, setHelperMessage] = React.useState("");
   const purpose = route.params?.purpose || "register_verify";
   const isPasswordReset = purpose === "password_reset";
 
@@ -26,7 +28,10 @@ export default function OTPVerificationScreen({ route, navigation }) {
         placeholderTextColor="#94A3B8"
         keyboardType="numeric"
         value={code}
-        onChangeText={setCode}
+        onChangeText={(value) => {
+          setHelperMessage("");
+          setCode(value);
+        }}
       />
       {isPasswordReset ? (
         <TextInput
@@ -35,10 +40,14 @@ export default function OTPVerificationScreen({ route, navigation }) {
           placeholderTextColor="#94A3B8"
           secureTextEntry
           value={newPassword}
-          onChangeText={setNewPassword}
+          onChangeText={(value) => {
+            setHelperMessage("");
+            setNewPassword(value);
+          }}
         />
       ) : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
+      {helperMessage ? <Text style={styles.success}>{helperMessage}</Text> : null}
       <AppButton
         title={loading ? "Processing..." : isPasswordReset ? "Reset password" : "Verify OTP"}
         disabled={loading}
@@ -70,6 +79,28 @@ export default function OTPVerificationScreen({ route, navigation }) {
           }
         }}
       />
+      <AppButton
+        title={resending ? "Resending OTP..." : "Resend OTP"}
+        variant="secondary"
+        disabled={resending}
+        onPress={async () => {
+          try {
+            setResending(true);
+            setError("");
+            setHelperMessage("");
+            await api.post("/auth/send-otp", {
+              target: route.params?.target,
+              channel: "email",
+              purpose,
+            });
+            setHelperMessage("A fresh OTP has been sent.");
+          } catch (otpError) {
+            setError(otpError?.response?.data?.message || "Could not resend OTP.");
+          } finally {
+            setResending(false);
+          }
+        }}
+      />
       <AppButton title="Back to login" variant="secondary" onPress={() => navigation.navigate("Login")} />
     </ScreenContainer>
   );
@@ -87,6 +118,12 @@ const styles = StyleSheet.create({
   error: {
     color: colors.danger,
     backgroundColor: "#FEF2F2",
+    padding: 12,
+    borderRadius: 12,
+  },
+  success: {
+    color: colors.primary,
+    backgroundColor: "#EEF2FF",
     padding: 12,
     borderRadius: 12,
   },
