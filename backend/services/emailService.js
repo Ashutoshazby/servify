@@ -1,27 +1,26 @@
-import sendgridMail from "@sendgrid/mail";
+import { Resend } from "resend";
 import { env } from "../config/env.js";
 import { logger } from "../config/logger.js";
 
-let sendgridConfigured = false;
+let resendClient;
 
-const getSendgridClient = () => {
-  if (!env.sendgridApiKey || !env.sendgridFromEmail) {
+const getResendClient = () => {
+  if (!env.resendApiKey) {
     return null;
   }
 
-  if (!sendgridConfigured) {
-    sendgridMail.setApiKey(env.sendgridApiKey);
-    sendgridConfigured = true;
+  if (!resendClient) {
+    resendClient = new Resend(env.resendApiKey);
   }
 
-  return sendgridMail;
+  return resendClient;
 };
 
 export const sendOtpEmail = async ({ to, code, purpose }) => {
-  const mailer = getSendgridClient();
+  const resend = getResendClient();
 
-  if (!mailer) {
-    logger.warn("SendGrid not configured. OTP email not sent.", { to, purpose });
+  if (!resend) {
+    logger.warn("Resend not configured. OTP email not sent.", { to, purpose });
     return false;
   }
 
@@ -37,11 +36,8 @@ export const sendOtpEmail = async ({ to, code, purpose }) => {
     login_verify: "complete your login",
   };
 
-  await mailer.send({
-    from: {
-      email: env.sendgridFromEmail,
-      name: env.sendgridFromName,
-    },
+  await resend.emails.send({
+    from: env.resendFrom,
     to,
     subject: subjectMap[purpose] || "Your Servify OTP",
     text: `Your Servify OTP is ${code}. Use it to ${actionMap[purpose] || "continue"}. It expires in ${env.otpTtlMinutes} minutes.`,
